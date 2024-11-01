@@ -1,3 +1,5 @@
+import 'package:rabbits_challenge/game_screen.dart';
+
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -563,7 +565,12 @@ class _LevelInfoWidgetState extends State<LevelInfoWidget>
                             16.0, 0.0, 16.0, 12.0),
                         child: FFButtonWidget(
                           onPressed: () {
-                            print('Button pressed ...'); //este botão deve abrir o primeiro nível com o game widget.
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      GameScreen()), // Navigate to the GameScreen
+                            );
                           },
                           text: 'Iniciar',
                           options: FFButtonOptions(
