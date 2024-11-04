@@ -13,8 +13,6 @@ class Checkpoint extends SpriteAnimationComponent
 
   @override
   FutureOr<void> onLoad() {
-    //TODO: make this dynamic
-
     //debugMode = true;
     add(RectangleHitbox(
       position: Vector2(18, 32),
@@ -40,9 +38,6 @@ class Checkpoint extends SpriteAnimationComponent
     if (other is Player) _reachedCheckpoint();
     super.onCollisionStart(intersectionPoints, other);
   }
-
-//TODO: clean this code using methods since its the same as above,
-// and see if there is a callback function to end animations on Flame
 
   void _reachedCheckpoint() async {
     animation = animation = SpriteAnimation.fromFrameData(

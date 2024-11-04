@@ -49,7 +49,7 @@ class GameScreenState extends State<GameScreen> {
     }
 
     // Initialize the game
-    final RabbitsChallenge game = RabbitsChallenge();
+    final RabbitsChallenge game = RabbitsChallenge(context);
 
     // Define the Blockly options
     final BlocklyOptions workspaceConfiguration =
@@ -129,13 +129,13 @@ class GameScreenState extends State<GameScreen> {
                   children: [
                     ElevatedButton(
                       onPressed: _compileAndRunBlockly,
-                      child: Text("Compilar e Executar Código"),
+                      child: const Text("Compilar e Executar Código"),
                     ),
                     ElevatedButton(
                       onPressed: () {
                         game.clearBlocklyWorkspace();
                       },
-                      child: Text("Limpar Workspace"),
+                      child: const Text("Limpar Workspace"),
                     ),
                   ],
                 ),

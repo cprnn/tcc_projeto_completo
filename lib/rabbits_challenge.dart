@@ -1,19 +1,22 @@
 import 'dart:async';
-
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 import 'package:rabbits_challenge/components/level.dart';
 import 'package:rabbits_challenge/components/player.dart';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:js';
+import 'package:rabbits_challenge/end_level/end_level_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RabbitsChallenge extends FlameGame
     with HasKeyboardHandlerComponents, DragCallbacks, HasCollisionDetection {
   @override
   Color backgroundColor() => const Color(0xFF211F30);
   late CameraComponent cam;
-  Player player = Player(character: 'Smoke');
+  late Player player;
   late JoystickComponent joystick;
   bool showJoystick = false;
   bool playSounds =
@@ -21,11 +24,52 @@ class RabbitsChallenge extends FlameGame
   double soundVolume = 1.0;
   List<String> levelNames = [
     'Level-01',
-  // 'Level-03',
-   // 'Level-02', //TODO: add here all the levels
+    // 'Level-03',
+    // 'Level-02', //TODO: add here all the levels
   ];
   int currentLevelIndex = 0;
   Level? currentLevel;
+
+  RabbitsChallenge(BuildContext context) {
+    _initializePlayer(context);
+  }
+
+  Future<void> _initializePlayer(BuildContext context) async {
+    String character = 'Smoke'; // Default character
+
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    String? userId = currentUser?.uid;
+
+    if (userId == null) {
+      //print("No user is currently logged in.");
+      return;
+    }
+
+    DocumentSnapshot userDoc =
+        await FirebaseFirestore.instance.collection('user').doc(userId).get();
+
+    if (userDoc.exists) {
+      Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+      String? bunnyType = userData?['type_bunny'];
+
+      switch (bunnyType) {
+        case 'Branco':
+          character = 'Snow';
+          break;
+        case 'Caramelo':
+          character = 'Caramel';
+          break;
+        case 'Cinza':
+          character = 'Smoke';
+          break;
+        default:
+          character = 'Smoke';
+      }
+    }
+
+    // ignore: use_build_context_synchronously
+    player = Player(context: context, character: character);
+  }
 
   @override
   FutureOr<void> onLoad() async {
@@ -90,20 +134,22 @@ class RabbitsChallenge extends FlameGame
 //Functions that control the level system, add loading screens and control access by the
 //home buttons and between levels, on a loading/continue screen
 
-  void loadNextLevel() {
+  void loadNextLevel(BuildContext context) {
     if (currentLevelIndex < levelNames.length - 1) {
       currentLevelIndex++;
       _loadLevel();
     } else {
-      //no more levels TODO: make it go to home screen, not the first level
-      currentLevelIndex = 0;
-      _loadLevel();
+      // No more levels, navigate to the EndLevelWidget
+      Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (context) =>
+                const EndLevelWidget()), // Use the widget class here
+      );
     }
   }
 
   void _loadLevel() {
     Future.delayed(const Duration(seconds: 1), () {
-      // TODO: on this delay, add a loading screen
       // Create a new Level instance and assign it to currentLevel
       currentLevel = Level(
         player: player,

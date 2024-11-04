@@ -1,8 +1,10 @@
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/material.dart';
 import 'package:rabbits_challenge/components/checkpoint.dart';
 import 'package:rabbits_challenge/components/collision_block.dart';
 import 'package:rabbits_challenge/components/custom_hitbox.dart';
@@ -13,7 +15,6 @@ import 'package:rabbits_challenge/components/utils.dart';
 import 'package:rabbits_challenge/rabbits_challenge.dart';
 
 enum PlayerState {
-  //TODO: add more player states
   idle,
   running,
   doubleJump,
@@ -29,14 +30,14 @@ enum Direction { left, right }
 
 class Player extends SpriteAnimationGroupComponent
     with HasGameRef<RabbitsChallenge>, KeyboardHandler, CollisionCallbacks {
-  //TODO:after add blockly, remove keyboard controls
   String character;
-  //constructor
-  // ignore: use_super_parameters
-  Player(
-      {super.position,
-      this.character =
-          'Snow'}); //super extends the SpriteAnimationGroupComponent
+  late final BuildContext context;
+
+  Player({
+    required this.context,
+    super.position,
+    this.character = 'Snow',
+  }) : super();
 
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation runningAnimation;
@@ -162,13 +163,13 @@ class Player extends SpriteAnimationGroupComponent
         score.incrementFruitsCollected();
       }
       if (other is Saw) _respawn();
-      if (other is Checkpoint) _reachedCheckpoint();
+      if (other is Checkpoint) _reachedCheckpoint(context);
       super.onCollisionStart(intersectionPoints, other);
     }
   }
 
   void _loadAllAnimations() {
-    //TODO: make this more dynamic after removing the hard coded path on _spriteAnimation
+
     idleAnimation = _spriteAnimation('Idle', 11);
     runningAnimation = _spriteAnimation('Run', 12);
     fallingAnimation = _spriteAnimation('Fall', 1);
@@ -184,7 +185,6 @@ class Player extends SpriteAnimationGroupComponent
     // wallJumpAnimation = _spriteAnimation('Wall Jump', 5);
 
     animations = {
-      //list of animations, add more as implemented
       PlayerState.idle: idleAnimation,
       PlayerState.running: runningAnimation,
       //PlayerState.doubleJump: doubleJumpAnimation,
@@ -196,14 +196,13 @@ class Player extends SpriteAnimationGroupComponent
       PlayerState.disappearing: disappearingAnimation,
     };
 
-//set current animation
     current = PlayerState.idle;
   }
 
   SpriteAnimation _spriteAnimation(String state, int amount) {
     return SpriteAnimation.fromFrameData(
       game.images.fromCache(
-          'Main Characters/$character/$state (32x32).png'), //TODO: make this more dynamic, no hard coded paths
+          'Main Characters/$character/$state (32x32).png'),
       SpriteAnimationData.sequenced(
         amount: amount,
         stepTime: 0.05,
@@ -212,11 +211,10 @@ class Player extends SpriteAnimationGroupComponent
     );
   }
 
-//after correcting the hard coded _spriteAnimation, adapt or remove _specialSpriteAnimation
   SpriteAnimation _specialSpriteAnimation(String state, int amount) {
     return SpriteAnimation.fromFrameData(
       game.images.fromCache(
-          'Main Characters/$state (96x96).png'), //TODO: make this more dynamic, no hard coded paths
+          'Main Characters/$state (96x96).png'),
       SpriteAnimationData.sequenced(
         amount: amount,
         stepTime: 0.05,
@@ -363,7 +361,7 @@ class Player extends SpriteAnimationGroupComponent
     Future.delayed(canMoveDuration, () => gotHit = false);
   }
 
-  void _reachedCheckpoint() async {
+  void _reachedCheckpoint(BuildContext context) async {
     if (game.playSounds) {
       FlameAudio.play('disappear.wav', volume: game.soundVolume);
     }
@@ -383,7 +381,7 @@ class Player extends SpriteAnimationGroupComponent
     position = Vector2.all(-640);
 
     const waitToChangeLevelDuration = Duration(seconds: 3);
-    Future.delayed(waitToChangeLevelDuration, () => game.loadNextLevel());
+    Future.delayed(waitToChangeLevelDuration, () => game.loadNextLevel(context));
   }
 
   void resetPosition() {

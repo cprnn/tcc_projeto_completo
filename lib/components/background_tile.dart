@@ -3,7 +3,6 @@ import 'package:flame/components.dart';
 import 'package:flame/parallax.dart';
 import 'package:flutter/painting.dart';
 
-//TODO: see if the scrolling background will be necessary
 class BackgroundTile extends ParallaxComponent {
   final String color;
   BackgroundTile({
