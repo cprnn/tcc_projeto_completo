@@ -3,6 +3,7 @@ import 'package:flame_tiled/flame_tiled.dart';
 import 'package:rabbits_challenge/components/background_tile.dart';
 import 'package:rabbits_challenge/components/checkpoint.dart';
 import 'package:rabbits_challenge/components/collision_block.dart';
+import 'package:rabbits_challenge/components/experience.dart';
 import 'package:rabbits_challenge/components/fruit.dart';
 import 'package:rabbits_challenge/components/player.dart';
 import 'package:rabbits_challenge/components/saw.dart';
@@ -14,6 +15,7 @@ class Level extends World with HasGameRef<RabbitsChallenge> {
   final String levelName;
   final Player player;
   final Score score = Score();
+  final Experience experience = Experience();
   Level({required this.levelName, required this.player});
 
   late TiledComponent level;
@@ -63,6 +65,7 @@ class Level extends World with HasGameRef<RabbitsChallenge> {
             break;
           case 'Fruit':
             final fruit = Fruit(
+                experience: experience,
                 score: score,
                 fruit: spawnPoint.name,
                 position: Vector2(spawnPoint.x, spawnPoint.y),
@@ -126,8 +129,9 @@ class Level extends World with HasGameRef<RabbitsChallenge> {
     //print("Resetting fruits...");
     for (var fruit in fruits) {
       fruit.reset();
-     // print("Fruit reset: $fruit");
+      // print("Fruit reset: $fruit");
     }
     score.resetScore();
+    experience.resetExperience();
   }
 }

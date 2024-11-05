@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:rabbits_challenge/components/custom_hitbox.dart';
+import 'package:rabbits_challenge/components/experience.dart';
 import 'package:rabbits_challenge/components/score.dart';
 import 'package:rabbits_challenge/rabbits_challenge.dart';
 
@@ -11,9 +12,11 @@ class Fruit extends SpriteAnimationComponent
     with HasGameRef<RabbitsChallenge>, CollisionCallbacks {
   final String fruit;
   final Score score;
+  final Experience experience;
 
   Fruit({
     this.fruit = 'Apple',
+    required this.experience,
     required this.score,
     super.position,
     super.size,
@@ -53,9 +56,11 @@ class Fruit extends SpriteAnimationComponent
   }
 
   void collidedWithPlayer() async {
+    //TODO: adicionar aqui a lógica que coloca 25 xp a cada fruta capturada
     if (!collected) {
       collected = true;
       score.incrementFruitsCollected();
+      experience.incrementExperincePerFruitCollected();
       if (game.playSounds) {
         FlameAudio.play('collect_fruit.wav', volume: game.soundVolume);
       }

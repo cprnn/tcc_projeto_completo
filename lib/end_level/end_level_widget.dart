@@ -83,7 +83,7 @@ class _EndLevelWidgetState extends State<EndLevelWidget> {
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                   child: Text(
-                    '${widget.experience} XP obtido',
+                    '${widget.experience} XP obtido', //TODO: buscar valor da tabela para colocar aqui
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           fontFamily: 'Readex Pro',
                           fontSize: 30,

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:rabbits_challenge/components/checkpoint.dart';
 import 'package:rabbits_challenge/components/collision_block.dart';
 import 'package:rabbits_challenge/components/custom_hitbox.dart';
+import 'package:rabbits_challenge/components/experience.dart';
 import 'package:rabbits_challenge/components/fruit.dart';
 import 'package:rabbits_challenge/components/saw.dart';
 import 'package:rabbits_challenge/components/score.dart';
@@ -153,6 +154,7 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   Score score = Score();
+  Experience experience = Experience();
 
   @override
   void onCollisionStart(
@@ -161,6 +163,7 @@ class Player extends SpriteAnimationGroupComponent
       if (other is Fruit) {
         other.collidedWithPlayer();
         score.incrementFruitsCollected();
+        experience.incrementExperincePerFruitCollected();
       }
       if (other is Saw) _respawn();
       if (other is Checkpoint) _reachedCheckpoint(context);
@@ -361,6 +364,8 @@ class Player extends SpriteAnimationGroupComponent
     Future.delayed(canMoveDuration, () => gotHit = false);
   }
 
+
+//todo: quero colocar aqui a lógica que sobe para o banco o valor de xp que foi obtido na fase
   void _reachedCheckpoint(BuildContext context) async {
     if (game.playSounds) {
       FlameAudio.play('disappear.wav', volume: game.soundVolume);
