@@ -14,6 +14,8 @@ import 'package:rabbits_challenge/components/saw.dart';
 import 'package:rabbits_challenge/components/score.dart';
 import 'package:rabbits_challenge/components/utils.dart';
 import 'package:rabbits_challenge/rabbits_challenge.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 enum PlayerState {
   idle,
@@ -40,6 +42,7 @@ class Player extends SpriteAnimationGroupComponent
     this.character = 'Snow',
   }) : super();
 
+  final Experience experience = Experience();
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation runningAnimation;
   late final SpriteAnimation doubleJumpAnimation;
@@ -154,7 +157,6 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   Score score = Score();
-  Experience experience = Experience();
 
   @override
   void onCollisionStart(
@@ -172,7 +174,6 @@ class Player extends SpriteAnimationGroupComponent
   }
 
   void _loadAllAnimations() {
-
     idleAnimation = _spriteAnimation('Idle', 11);
     runningAnimation = _spriteAnimation('Run', 12);
     fallingAnimation = _spriteAnimation('Fall', 1);
@@ -204,8 +205,7 @@ class Player extends SpriteAnimationGroupComponent
 
   SpriteAnimation _spriteAnimation(String state, int amount) {
     return SpriteAnimation.fromFrameData(
-      game.images.fromCache(
-          'Main Characters/$character/$state (32x32).png'),
+      game.images.fromCache('Main Characters/$character/$state (32x32).png'),
       SpriteAnimationData.sequenced(
         amount: amount,
         stepTime: 0.05,
@@ -216,8 +216,7 @@ class Player extends SpriteAnimationGroupComponent
 
   SpriteAnimation _specialSpriteAnimation(String state, int amount) {
     return SpriteAnimation.fromFrameData(
-      game.images.fromCache(
-          'Main Characters/$state (96x96).png'),
+      game.images.fromCache('Main Characters/$state (96x96).png'),
       SpriteAnimationData.sequenced(
         amount: amount,
         stepTime: 0.05,
@@ -364,7 +363,6 @@ class Player extends SpriteAnimationGroupComponent
     Future.delayed(canMoveDuration, () => gotHit = false);
   }
 
-
 //todo: quero colocar aqui a lógica que sobe para o banco o valor de xp que foi obtido na fase
   void _reachedCheckpoint(BuildContext context) async {
     if (game.playSounds) {
@@ -385,8 +383,62 @@ class Player extends SpriteAnimationGroupComponent
     reachedCheckpoint = false;
     position = Vector2.all(-640);
 
+    await updateUserExperience();
+
     const waitToChangeLevelDuration = Duration(seconds: 3);
-    Future.delayed(waitToChangeLevelDuration, () => game.loadNextLevel(context));
+    Future.delayed(
+        waitToChangeLevelDuration, () => game.loadNextLevel(context));
+  }
+
+  Future<void> updateUserExperience() async {
+    // Get the current user's ID
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    String? userId = currentUser?.uid;
+
+    if (userId == null) {
+      //print("No user is currently logged in.");
+      return;
+    }
+
+    double totalExperience = experience.getExperienceCollected();
+    print("Total Experience to add: $totalExperience");
+
+    DocumentReference userDocRef =
+        FirebaseFirestore.instance.collection('user').doc(userId);
+
+    try {
+      // Check if the user document exists before starting the transaction
+      DocumentSnapshot userDoc = await userDocRef.get();
+      if (!userDoc.exists) {
+        //print("User  document does not exist.");
+        return;
+      }
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot userDoc = await transaction.get(userDocRef);
+        if (userDoc.exists) {
+          Map<String, dynamic>? userData =
+              userDoc.data() as Map<String, dynamic>?;
+          double currentExperience = userData?['experience'] ?? 0.0;
+          double newExperience = currentExperience + totalExperience;
+          transaction.update(userDocRef, {'experience': newExperience});
+          print("Experience updated in Firestore.");
+        } else {
+          //print("User  document does not exist during transaction.");
+        }
+      });
+    } catch (e) {
+      print("Transaction failed: ${e.toString()}");
+      print("Stack trace: ${StackTrace.current}");
+    }
+  }
+
+  double getCurrentLevelExperience() {
+    return experience.getExperienceCollected();
+  }
+
+  void resetExperience() {
+    experience.resetExperience();
   }
 
   void resetPosition() {

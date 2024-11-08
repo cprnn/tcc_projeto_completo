@@ -29,6 +29,8 @@ class RabbitsChallenge extends FlameGame
   ];
   int currentLevelIndex = 0;
   Level? currentLevel;
+  double currentLevelExperience = 0.0;
+  double totalExperience = 0.0;
 
   RabbitsChallenge(BuildContext context) {
     _initializePlayer(context);
@@ -132,7 +134,6 @@ class RabbitsChallenge extends FlameGame
 */
 
 //Functions that control the level system, add loading screens and control access by the
-//home buttons and between levels, on a loading/continue screen
 
   void loadNextLevel(BuildContext context) {
     if (currentLevelIndex < levelNames.length - 1) {
@@ -140,10 +141,17 @@ class RabbitsChallenge extends FlameGame
       _loadLevel();
     } else {
       // No more levels, navigate to the EndLevelWidget
+      double currentExperience =
+          player.getCurrentLevelExperience(); // Get current level experience
+      player.resetExperience(); // Reset experience for the next level
       Navigator.of(context).push(
         MaterialPageRoute(
-            builder: (context) =>
-                const EndLevelWidget()), // Use the widget class here
+          builder: (context) => EndLevelWidget(
+            experience: totalExperience.toString(), // Pass total experience
+            currentLevelExperience:
+                currentExperience, // Pass current level experience
+          ),
+        ),
       );
     }
   }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 //import 'package:flutter_spinkit/flutter_spinkit.dart';
 //import 'package:google_fonts/google_fonts.dart';
 //import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'end_level_model.dart';
 export 'end_level_model.dart';
@@ -12,10 +14,12 @@ export 'end_level_model.dart';
 class EndLevelWidget extends StatefulWidget {
   const EndLevelWidget({
     super.key,
-    this.experience,
+    required this.experience,
+    required this.currentLevelExperience,
   });
 
   final String? experience;
+  final double currentLevelExperience;
 
   @override
   State<EndLevelWidget> createState() => _EndLevelWidgetState();
@@ -23,21 +27,47 @@ class EndLevelWidget extends StatefulWidget {
 
 class _EndLevelWidgetState extends State<EndLevelWidget> {
   late EndLevelModel _model;
+  double _experience = 0.0;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+    _fetchExperience();
+
     _model = createModel(context, () => EndLevelModel());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+    //WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
+  }
+
+  Future<void> _fetchExperience() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      String userId = currentUser.uid;
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('user')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        Map<String, dynamic>? userData =
+            userDoc.data() as Map<String, dynamic>?;
+        setState(() {
+          _experience =
+              userData?['experience'] ?? 0.0; // Update the experience variable
+        });
+      } else {
+        print("User  document does not exist.");
+      }
+    } else {
+      print("No user is currently logged in.");
+    }
   }
 
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -83,7 +113,7 @@ class _EndLevelWidgetState extends State<EndLevelWidget> {
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                   child: Text(
-                    '${widget.experience} XP obtido', //TODO: buscar valor da tabela para colocar aqui
+                     '${widget.currentLevelExperience} XP obtido',
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
                           fontFamily: 'Readex Pro',
                           fontSize: 30,
@@ -100,8 +130,10 @@ class _EndLevelWidgetState extends State<EndLevelWidget> {
                     text: 'Continuar',
                     options: FFButtonOptions(
                       height: 40,
-                      padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
-                      iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
+                      iconPadding:
+                          const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
                       color: FlutterFlowTheme.of(context).customColor3,
                       textStyle:
                           FlutterFlowTheme.of(context).titleSmall.override(
