@@ -569,7 +569,7 @@ class _LevelInfoWidgetState extends State<LevelInfoWidget>
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      const GameScreen()), // Navigate to the GameScreen
+                                      const GameScreen(levelName:'Level-01')),
                             );
                           },
                           text: 'Iniciar',

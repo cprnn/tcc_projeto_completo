@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +11,9 @@ import 'package:rabbits_challenge/rabbits_challenge.dart';
 import 'dart:js';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  final String levelName;
+
+  const GameScreen({super.key, required this.levelName}); 
 
   @override
   GameScreenState createState() => GameScreenState();
@@ -49,7 +53,7 @@ class GameScreenState extends State<GameScreen> {
     }
 
     // Initialize the game
-    final RabbitsChallenge game = RabbitsChallenge(context);
+    final RabbitsChallenge game = RabbitsChallenge(context, widget.levelName);
 
     // Define the Blockly options
     final BlocklyOptions workspaceConfiguration =

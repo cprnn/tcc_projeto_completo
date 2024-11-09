@@ -1,4 +1,7 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
+import 'dart:collection';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'package:flame/collisions.dart';
@@ -43,6 +46,9 @@ class Player extends SpriteAnimationGroupComponent
   }) : super();
 
   final Experience experience = Experience();
+  final Queue<String> commandQueue = Queue<String>();
+  bool isExecutingCommand = false;
+
   late final SpriteAnimation idleAnimation;
   late final SpriteAnimation runningAnimation;
   late final SpriteAnimation doubleJumpAnimation;
@@ -87,6 +93,39 @@ class Player extends SpriteAnimationGroupComponent
   );
 
   Direction _direction = Direction.right;
+
+  void queueCommand(String command) {
+    commandQueue.add(command);
+    if (!isExecutingCommand) {
+      executeNextCommand();
+    }
+  }
+
+  Future<void> executeNextCommand() async {
+    if (commandQueue.isEmpty) {
+      isExecutingCommand = false;
+      return;
+    }
+    isExecutingCommand = true;
+    String command = commandQueue.removeFirst();
+
+    switch (command) {
+      case 'move_right':
+        moveRight();
+        break;
+      case 'move_left':
+        moveLeft();
+        break;
+    }
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    executeNextCommand();
+  }
+
+  void moveRight() {}
+
+  void moveLeft() {}
 
   @override
   FutureOr<void> onLoad() {
@@ -168,7 +207,10 @@ class Player extends SpriteAnimationGroupComponent
         experience.incrementExperincePerFruitCollected();
       }
       if (other is Saw) _respawn();
-      if (other is Checkpoint) _reachedCheckpoint(context);
+      if (other is Checkpoint) {
+        experience.incrementExperiencePerLevelFinished();
+        _reachedCheckpoint(context);
+      }
       super.onCollisionStart(intersectionPoints, other);
     }
   }
@@ -385,13 +427,15 @@ class Player extends SpriteAnimationGroupComponent
 
     await updateUserExperience();
 
-    const waitToChangeLevelDuration = Duration(seconds: 3);
+/*    const waitToChangeLevelDuration = Duration(seconds: 3);
     Future.delayed(
-        waitToChangeLevelDuration, () => game.loadNextLevel(context));
+        waitToChangeLevelDuration,
+        // ignore: use_build_context_synchronously
+        () => game.loadNextLevel(context)); 
+        */
   }
 
   Future<void> updateUserExperience() async {
-    // Get the current user's ID
     User? currentUser = FirebaseAuth.instance.currentUser;
     String? userId = currentUser?.uid;
 

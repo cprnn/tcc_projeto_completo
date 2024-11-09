@@ -1,3 +1,5 @@
+import 'package:rabbits_challenge/game_screen.dart';
+
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -178,42 +180,52 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     ],
                   ),
                 ),
-                Opacity(
-                  opacity: 0.5,
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                        50.0, 30.0, 50.0, 0.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Align(
-                          alignment: const AlignmentDirectional(1.0, 0.0),
-                          child: Material(
-                            color: Colors.transparent,
-                            elevation: 5.0,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(
+                      50.0, 30.0, 50.0, 0.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Align(
+                        alignment: const AlignmentDirectional(1.0, 0.0),
+                        child: Material(
+                          color: Colors.transparent,
+                          elevation: 5.0,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(15.0),
+                              bottomRight: Radius.circular(15.0),
+                              topLeft: Radius.circular(15.0),
+                              topRight: Radius.circular(15.0),
+                            ),
+                          ),
+                          child: Container(
+                            width: 800.0,
+                            height: 204.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).customColor6,
+                              borderRadius: const BorderRadius.only(
                                 bottomLeft: Radius.circular(15.0),
                                 bottomRight: Radius.circular(15.0),
                                 topLeft: Radius.circular(15.0),
                                 topRight: Radius.circular(15.0),
                               ),
+                              shape: BoxShape.rectangle,
                             ),
-                            child: Container(
-                              width: 800.0,
-                              height: 204.0,
-                              decoration: BoxDecoration(
-                                color:
-                                    FlutterFlowTheme.of(context).customColor6,
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(15.0),
-                                  bottomRight: Radius.circular(15.0),
-                                  topLeft: Radius.circular(15.0),
-                                  topRight: Radius.circular(15.0),
-                                ),
-                                shape: BoxShape.rectangle,
-                              ),
+                            child: InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const GameScreen(levelName: 'Level-03',)), // Navigate to the GameScreen
+                                );
+                              },
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
@@ -248,8 +260,8 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
 /*                Opacity(

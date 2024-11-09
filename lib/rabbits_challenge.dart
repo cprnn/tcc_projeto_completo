@@ -19,20 +19,22 @@ class RabbitsChallenge extends FlameGame
   late Player player;
   late JoystickComponent joystick;
   bool showJoystick = false;
-  bool playSounds =
-      true; //TODO: turn it off when coding if debugging in Windows
+  bool playSounds = true;
   double soundVolume = 1.0;
-  List<String> levelNames = [
-    'Level-01',
-    // 'Level-03',
-    // 'Level-02', //TODO: add here all the levels
-  ];
+
+  final String levelName;
+
+  //List<String> levelNames = [
+  //  'Level-01',
+  //  'Level-03',
+  // 'Level-02',
+  //];
   int currentLevelIndex = 0;
   Level? currentLevel;
   double currentLevelExperience = 0.0;
   double totalExperience = 0.0;
 
-  RabbitsChallenge(BuildContext context) {
+  RabbitsChallenge(BuildContext context, this.levelName) {
     _initializePlayer(context);
   }
 
@@ -78,7 +80,7 @@ class RabbitsChallenge extends FlameGame
     //loading all images to cache
     await images.loadAllImages();
 
-    _loadLevel();
+    _loadLevel(levelName);
 
     // if (showJoystick) {
     //    addJoystick();
@@ -135,10 +137,10 @@ class RabbitsChallenge extends FlameGame
 
 //Functions that control the level system, add loading screens and control access by the
 
-  void loadNextLevel(BuildContext context) {
+/*  void loadNextLevel(BuildContext context) {
     if (currentLevelIndex < levelNames.length - 1) {
       currentLevelIndex++;
-      _loadLevel();
+      _loadLevel(levelNames[currentLevelIndex]);
     } else {
       // No more levels, navigate to the EndLevelWidget
       double currentExperience =
@@ -155,13 +157,13 @@ class RabbitsChallenge extends FlameGame
       );
     }
   }
-
-  void _loadLevel() {
+*/
+  void _loadLevel(String levelName) {
     Future.delayed(const Duration(seconds: 1), () {
       // Create a new Level instance and assign it to currentLevel
       currentLevel = Level(
         player: player,
-        levelName: levelNames[currentLevelIndex],
+        levelName: levelName,
       );
 
       // Create a camera component with fixed resolution
