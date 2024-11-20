@@ -42,7 +42,7 @@ class Fruit extends SpriteAnimationComponent
     add(RectangleHitbox(
       position: Vector2(hitbox.offsetX, hitbox.offsetY),
       size: Vector2(hitbox.width, hitbox.height),
-      collisionType: CollisionType.passive,
+      collisionType: CollisionType.active,
     ));
     animation = SpriteAnimation.fromFrameData(
       game.images.fromCache('Items/Fruits/$fruit.png'),
@@ -56,7 +56,6 @@ class Fruit extends SpriteAnimationComponent
   }
 
   void collidedWithPlayer() async {
-    //TODO: adicionar aqui a lógica que coloca 25 xp a cada fruta capturada
     if (!collected) {
       collected = true;
       score.incrementFruitsCollected();

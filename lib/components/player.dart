@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'dart:async';
 import 'dart:collection';
@@ -16,6 +16,7 @@ import 'package:rabbits_challenge/components/fruit.dart';
 import 'package:rabbits_challenge/components/saw.dart';
 import 'package:rabbits_challenge/components/score.dart';
 import 'package:rabbits_challenge/components/utils.dart';
+import 'package:rabbits_challenge/end_level/end_level_widget.dart';
 import 'package:rabbits_challenge/rabbits_challenge.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -59,6 +60,8 @@ class Player extends SpriteAnimationGroupComponent
   late final SpriteAnimation appearingAnimation;
   late final SpriteAnimation disappearingAnimation;
 
+  bool isMoving = false;
+
 //Frame animation time
   final double stepTime = 0.05;
 
@@ -72,7 +75,7 @@ class Player extends SpriteAnimationGroupComponent
   double moveSpeed = 100;
   Vector2 velocity = Vector2.zero();
   double moveDistance =
-      16.0; //Exactly the width of the widget of the block painted as the ground in Tiled - 32 pixels
+      32.0; //Exactly the width of the widget of the block painted as the ground in Tiled - 32 pixels
 
 //Checks collisions and if jumped
   bool isOnGround = false;
@@ -111,21 +114,19 @@ class Player extends SpriteAnimationGroupComponent
 
     switch (command) {
       case 'move_right':
-        moveRight();
+        await _movePlayerOverTime(1);
         break;
       case 'move_left':
-        moveLeft();
+        await _movePlayerOverTime(-1);
         break;
     }
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 100));
 
+    _checkFruitCollisions();
     executeNextCommand();
+    //print('Executing command: $command');
   }
-
-  void moveRight() {}
-
-  void moveLeft() {}
 
   @override
   FutureOr<void> onLoad() {
@@ -146,11 +147,12 @@ class Player extends SpriteAnimationGroupComponent
         }
       } else if (event.data['action'] == 'move_player') {
         if (event.data['direction'] == 'left') {
-          _direction = Direction.left;
-          _movePlayerOverTime(-1);
+          commandQueue.add('move_left');
         } else if (event.data['direction'] == 'right') {
-          _direction = Direction.right;
-          _movePlayerOverTime(1);
+          commandQueue.add('move_right');
+        }
+        if (!isExecutingCommand) {
+          executeNextCommand();
         }
       } else if (event.data['action'] == 'jump') {
         hasJumped = true;
@@ -162,16 +164,15 @@ class Player extends SpriteAnimationGroupComponent
 
   @override
   void update(double dt) {
-    //dt: delta time
-
     if (!gotHit && !reachedCheckpoint) {
       _updatePlayerState();
       _updatePlayerPosition(dt);
 
       _checkHorizontalCollisions();
       _applyGravity(dt);
-
       _checkVerticalCollisions();
+
+      _checkFruitCollisions();
     }
     super.update(dt);
   }
@@ -181,20 +182,24 @@ class Player extends SpriteAnimationGroupComponent
     position.x += distance;
   }
 
-  void _movePlayerOverTime(double direction) {
-    double stepTime =
-        0.01; // adjust this value to control the smoothness of the movement
+  Future<void> _movePlayerOverTime(double direction) async {
+    _movePlayer(moveDistance * direction);
+    await Future.delayed(const Duration(milliseconds: 10));
+  }
+
+/*  Future<void> _movePlayerOverTime(double direction) async {
+    double stepTime = 0.01; // Smoothness of the movement
     int steps = (moveDistance / moveSpeed / stepTime).toInt();
     double stepDistance = moveDistance / steps;
 
     for (int i = 0; i < steps; i++) {
       _movePlayer(stepDistance * direction);
-      Future.delayed(Duration(milliseconds: (stepTime * 1000).toInt()));
+      await Future.delayed(const Duration(milliseconds: 10 /*(stepTime * 1000).toInt()*/));
     }
     // Ensure the player is moved exactly _moveDistance pixels
     position.x = (position.x + direction * moveDistance).roundToDouble();
   }
-
+*/
   Score score = Score();
 
   @override
@@ -350,6 +355,20 @@ class Player extends SpriteAnimationGroupComponent
     position.y += velocity.y * dt;
   }
 
+  void _checkFruitCollisions() {
+    for (final component in gameRef.children) {
+      if (component is Fruit && !component.collected) {
+        // Print positions for debugging
+        print(
+            'Player position: $position, Fruit position: ${component.position}');
+        if (checkCollision(this, component)) {
+          print('Fruit collected!'); // Debug print
+          component.collidedWithPlayer();
+        }
+      }
+    }
+  }
+
   void _checkVerticalCollisions() {
     for (final block in collisionBlocks) {
       if (block.isPlatform) {
@@ -426,6 +445,18 @@ class Player extends SpriteAnimationGroupComponent
     position = Vector2.all(-640);
 
     await updateUserExperience();
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EndLevelWidget(
+          experience: experience
+              .getExperienceCollected()
+              .toString(), // Pass total experience
+          currentLevelExperience:
+              getCurrentLevelExperience(), // Pass current level experience
+        ),
+      ),
+    );
 
 /*    const waitToChangeLevelDuration = Duration(seconds: 3);
     Future.delayed(

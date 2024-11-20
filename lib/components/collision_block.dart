@@ -9,6 +9,6 @@ class CollisionBlock extends PositionComponent {
     super.size,
     this.isPlatform = false,
   }) {
-    //debugMode = true;  //TODO: do not forget to remove this
+    //debugMode = true;
   }
 }

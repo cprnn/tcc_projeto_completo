@@ -7,7 +7,6 @@ import 'package:rabbits_challenge/components/level.dart';
 import 'package:rabbits_challenge/components/player.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:js';
-import 'package:rabbits_challenge/end_level/end_level_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -158,6 +157,7 @@ class RabbitsChallenge extends FlameGame
     }
   }
 */
+
   void _loadLevel(String levelName) {
     Future.delayed(const Duration(seconds: 1), () {
       // Create a new Level instance and assign it to currentLevel
